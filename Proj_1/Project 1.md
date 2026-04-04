@@ -8,6 +8,6 @@
 
 ## Work Division
 - Diogo: 1-a-i), PSOR
-- Gabriel:
+- Gabriel: 2)
 - Pedro: 1-a-ii) Runge-Kutta
 - Tiago: Relatório e Exploração de Mercados 
