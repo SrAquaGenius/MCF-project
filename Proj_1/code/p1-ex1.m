@@ -1,5 +1,6 @@
 %% Initialize Values
 clc, clearvars
+addpath('Proj_1/code')
 
 % Change the below values as the exercise request!
 
