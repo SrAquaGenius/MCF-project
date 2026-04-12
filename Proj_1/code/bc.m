@@ -8,6 +8,7 @@ function [res] = bc(type, op, side, S, t, K, r)
 % - K: Strike price
 % - r: Risk free interest rate
 
+
 res = zeros(size(t));
     
 if type == "Eu" && op == "Put" && side == "left"
