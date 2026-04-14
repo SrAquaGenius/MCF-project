@@ -25,8 +25,8 @@ t = t_0:ht:T;    % points of time
 % Initialize matrices for storing results (lines -> time; columns -> space)
 U = zeros(Nt+1, Ns+1); % Matrix that stores the final results
 U(1,:) = payoff(type, op, s, K);                % Condition t = t_0
-U(:,1) = bc(type, op, "left", s_0, t, K, r);    % Ccondition s = s_0
-U(:,end) = bc(type, op, "right", s_S, t, K, r); % Ccondition s = S*
+U(:,1) = bc(type, op, "left", s_0, t, K, r, T);    % Condition s = s_0
+U(:,end) = bc(type, op, "right", s_S, t, K, r, T); % Condition s = S*
 
 
 % Define Aproximation Formula
@@ -63,6 +63,8 @@ for j = 1:Nt
     U(j+1,2:Ns) = U_next'; % guardar solução
 end
 
+%disp(U)
+
 % Crate surface for visualizing the result
 [S,T]=meshgrid(s,t);
 figure
@@ -70,7 +72,10 @@ surf(S,T,U,'FaceLighting','phong','EdgeColor','none','FaceColor','interp');
 xlabel('Stock price S')
 ylabel('Time t')
 zlabel('Option value V')
-title('Black-Scholes Call Price Surface')
+
+if strcmpi(op,'put'), Op = 'Put'; else Op = 'Call'; end
+if strcmpi(type,'am'), Type = 'American'; else Type = 'European'; end
+title(['Black-Scholes ' Op ' Price Surface on an ' Type ' Option'])
 colorbar
 hold on
 
