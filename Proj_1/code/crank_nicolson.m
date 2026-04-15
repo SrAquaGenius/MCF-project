@@ -56,8 +56,8 @@ for j = Nt:-1:1
     rhs = B * U_now;
 
     % adicionar efeitos das fronteiras
-    rhs(1)   = rhs(1)   - a_i(1)   * U(j+1,1);
-    rhs(end) = rhs(end) - c_i(end) * U(j+1,end);
+    rhs(1) = rhs(1) - a_i(1) * U(j+1,1) - a_i(1) * U(j,1);
+    rhs(end) = rhs(end) - c_i(end) * U(j+1,end) - c_i(end) * U(j,end);
 
     U_next = A \ rhs;      % resolver sistema linear
     U(j,2:Ns) = U_next'; % guardar solução
