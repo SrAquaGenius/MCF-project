@@ -69,6 +69,11 @@ end
 [S,T]=meshgrid(s,t);
 figure
 surf(S,T,U,'FaceLighting','phong','EdgeColor','none','FaceColor','interp');
+if strcmpi(op,'put')
+    view(45, 25)    % eixo do espaço à direita
+else
+    view(-45, 25)   % eixo do espaço à esquerda
+end
 xlabel('Stock price S')
 ylabel('Time t')
 zlabel('Option value V')
@@ -79,6 +84,33 @@ title(['Black-Scholes ' Op ' Price Surface on an ' Type ' Option'])
 colorbar
 hold on
 
+% ------------------ Criar grelha na malha de superfície ------------------
+t_vals = linspace(t(1), t(end), 10);
+s_vals = linspace(s(1), s(end), 6);
+
+% Linhas paralelas ao eixo S (tempo fixo)
+for tt = t_vals
+
+    [~, idx_t] = min(abs(t - tt)); % encontrar índice mais próximo
+
+    plot3(s, ...
+          t(idx_t)*ones(size(s)), ...
+          U(idx_t,:), ...
+          'k-', 'LineWidth', 0.8);
+end
+
+% Linhas paralelas ao eixo t (espaço fixo)
+for ss = s_vals
+    
+    [~, idx_s] = min(abs(s - ss)); % encontrar índice mais próximo
+    
+    plot3(s(idx_s)*ones(size(t)), ...
+          t, ...
+          U(:,idx_s), ...
+          'k-', 'LineWidth', 0.8);
+end
+
+% -------------------- Selecionador de linhas temporais -------------------
 % Selecionar 5 valores de t (0%, 25%, 50%, 75%, 100%)
 idx_list = round(linspace(1, length(t), 5));
 
