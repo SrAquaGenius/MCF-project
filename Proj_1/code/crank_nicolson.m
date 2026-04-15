@@ -24,7 +24,7 @@ t = t_0:ht:T;    % points of time
 
 % Initialize matrices for storing results (lines -> time; columns -> space)
 U = zeros(Nt+1, Ns+1); % Matrix that stores the final results
-U(1,:) = payoff(type, op, s, K);                % Condition t = t_0
+U(end,:) = payoff(type, op, s, K);                % Condition t = t_0
 U(:,1) = bc(type, op, "left", s_0, t, K, r, T);    % Condition s = s_0
 U(:,end) = bc(type, op, "right", s_S, t, K, r, T); % Condition s = S*
 
@@ -48,9 +48,9 @@ A = diag(b_i) + diag(a_i(2:end),-1) + diag(c_i(1:end-1),1);
 % Matrix B (Right side of the system)
 B = diag(d_i) + diag(-a_i(2:end),-1) + diag(-c_i(1:end-1),1);
 
-for j = 1:Nt
+for j = Nt:-1:1
     % vetor da solução no tempo atual (pontos interiores)
-    U_now = U(j,2:Ns)';
+    U_now = U(j+1,2:Ns)';
 
     % lado direito do sistema
     rhs = B * U_now;
@@ -60,7 +60,7 @@ for j = 1:Nt
     rhs(end) = rhs(end) - c_i(end) * U(j+1,end);
 
     U_next = A \ rhs;      % resolver sistema linear
-    U(j+1,2:Ns) = U_next'; % guardar solução
+    U(j,2:Ns) = U_next'; % guardar solução
 end
 
 %disp(U)
