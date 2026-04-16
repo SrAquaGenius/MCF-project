@@ -22,6 +22,15 @@ if type == "Eu" && op == "Put"
     res = max(K-S, 0);
 else if type == "Eu" && op == "Call"
     res = max(S-K, 0);
+%how will I define this V_cont.
+else if type == "Am" && op == "Put"
+    res = max(K-S , res);
+
+else if type == "Am" && op == "Call"
+    res = max(S-K , res);
+end
+end
+
 end
 
 end
