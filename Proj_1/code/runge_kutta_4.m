@@ -1,4 +1,4 @@
-function [t_exec] = runge_kutta_4(type, op, S, T, K, r, sigma, Ns, Nt)
+function [t_exec, result] = runge_kutta_4(type, op, S, T, K, r, sigma, Ns, Nt)
 % Runge-Kutta 4 applied to Black-Scholes by the method of lines
 
 clc, tic
@@ -81,6 +81,7 @@ title('Black-Scholes RK4 Surface')
 colorbar
 
 t_exec = toc;
+result = U;
 
 
 
