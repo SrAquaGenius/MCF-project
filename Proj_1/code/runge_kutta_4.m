@@ -1,7 +1,7 @@
-function [t_exec] = runge_kutta_4(type, op, S, T, K, r, sigma, Ns, Nt)
+function [t_exec, U] = runge_kutta_4(type, op, S, T, K, r, sigma, Ns, Nt)
 % Runge-Kutta 4 applied to Black-Scholes by the method of lines
 
-clc, tic
+tic
 
 s_0 = 0; % Inicial value on space
 s_S = S; % Final value on space
@@ -15,9 +15,9 @@ t = t_0:ht:T;    % points of time
 
 % Initialize matrix that stores the final results
 U = zeros(Nt+1, Ns+1);
-U(end,:) = payoff(type, op, s, K);              % Condition t = t_0
-U(:,1)   = bc(type, op, "left",  s_0, t, K, r); % Condition s = s_0
-U(:,end) = bc(type, op, "right", s_S, t, K, r); % Condition s = S*
+U(end,:) = payoff(type, op, s, K);                 % Condition t = t_0
+U(:,1)   = bc(type, op, "left",  s_0, t, K, r, T); % Condition s = s_0
+U(:,end) = bc(type, op, "right", s_S, t, K, r, T); % Condition s = S*
 
 % Construção da matriz espacial (igual ao CN mas sem ht)
 i = 2:Ns;
@@ -69,20 +69,10 @@ for n = Nt:-1:1
     U(n,2:Ns) = Vprev';
 end
 
-% Plotting
-[Sg,Tg] = meshgrid(s,t);
-
-figure
-surf(Sg,Tg,U,'FaceLighting','phong','EdgeColor','none','FaceColor','interp');
-xlabel('Stock price S')
-ylabel('Time t')
-zlabel('Option value V')
-title('Black-Scholes RK4 Surface')
-colorbar
+plot_surface(s, t, U, type, op);
+setup_time_selector(s, t, U);
 
 t_exec = toc;
-
-
 
 % Auxiliar function
 function b = compute_boundary(U, t_idx, a_i, c_i, Ns)
