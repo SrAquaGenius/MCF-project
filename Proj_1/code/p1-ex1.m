@@ -4,8 +4,8 @@ addpath('Proj_1/code')
 
 % Change the below values as the exercise request!
 
-type = "Eu"; % or "Am"
-op = "Call";  % or "Put"
+type = "Eu"; % "Eu" or "Am"
+op = "Put";  % "Call" or "Put"
 
 Ss = 15;     % S* stock price boundary
 T = 1;       % Maturity time
