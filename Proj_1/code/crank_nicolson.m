@@ -1,4 +1,4 @@
-function [t_exec, result] = crank_nicolson(type, op, S, T, K, r, sigma, Ns, Nt)
+function [t_exec, U] = crank_nicolson(type, op, S, T, K, r, sigma, Ns, Nt)
 % Crank-Nicolson:
 % - type: Type of Option: "Am" American or "Eu" European
 % - op: Operation type: "Put" or "Call"
@@ -10,7 +10,7 @@ function [t_exec, result] = crank_nicolson(type, op, S, T, K, r, sigma, Ns, Nt)
 % - Ns: Number of subdivisions on space
 % - Nt: Number of subdivisions on time
 
-clc, tic
+tic
 
 s_0 = 0; % Inicial value on space
 s_S = S; % Final value on space
@@ -28,12 +28,11 @@ U(end,:) = payoff(type, op, s, K);                 % Condition t = t_0
 U(:,1) = bc(type, op, "left", s_0, t, K, r, T);    % Condition s = s_0
 U(:,end) = bc(type, op, "right", s_S, t, K, r, T); % Condition s = S*
 
-
 % Define Aproximation Formula
 i = 2:Ns;      % Indexes on space
 S_i = s(i);    % Values of space for each index
 
-% Coeficiente do método de Crank-Nicolson
+% Coeficientes do método de Crank-Nicolson
 alpha = sigma^2/2.*ht.*S_i.^2;
 beta = r*ht/2;
 
@@ -65,78 +64,8 @@ for j = Nt:-1:1
     U(j,2:Ns) = (A \ rhs)';
 end
 
-%disp(U)
-
-% Crate surface for visualizing the result
-[S,T]=meshgrid(s,t);
-figure
-surf(S,T,U,'FaceLighting','phong','EdgeColor','none','FaceColor','interp');
-if strcmpi(op,'put')
-    view(45, 25)    % eixo do espaço à direita
-else
-    view(-45, 25)   % eixo do espaço à esquerda
-end
-xlabel('Stock price S')
-ylabel('Time t')
-zlabel('Option value V')
-
-if strcmpi(op,'put'), Op = 'Put'; else Op = 'Call'; end
-if strcmpi(type,'am'), Type = 'American'; else Type = 'European'; end
-title(['Black-Scholes ' Op ' Price Surface on an ' Type ' Option'])
-colorbar
-hold on
-
-% ------------------ Criar grelha na malha de superfície ------------------
-t_vals = linspace(t(1), t(end), 10);
-s_vals = linspace(s(1), s(end), 6);
-
-% Linhas paralelas ao eixo S (tempo fixo)
-for tt = t_vals
-
-    [~, idx_t] = min(abs(t - tt)); % encontrar índice mais próximo
-
-    plot3(s, ...
-          t(idx_t)*ones(size(s)), ...
-          U(idx_t,:), ...
-          'k-', 'LineWidth', 0.8);
-end
-
-% Linhas paralelas ao eixo t (espaço fixo)
-for ss = s_vals
-    
-    [~, idx_s] = min(abs(s - ss)); % encontrar índice mais próximo
-    
-    plot3(s(idx_s)*ones(size(t)), ...
-          t, ...
-          U(:,idx_s), ...
-          'k-', 'LineWidth', 0.8);
-end
-
-% -------------------- Selecionador de linhas temporais -------------------
-% Selecionar 5 valores de t (0%, 25%, 50%, 75%, 100%)
-idx_list = round(linspace(1, length(t), 5));
-
-% Linha destacada inicial
-idx = idx_list(1);
-hLine = plot3(s, t(idx)*ones(size(s)), U(idx,:), ...
-              'k', 'LineWidth', 2);
-
-% Botões apenas para esses 5 valores
-for k = 1:length(idx_list)
-    i = idx_list(k);
-    uicontrol('Style','pushbutton',...
-        'String',['t = ' sprintf('%.2f', t(i))],...
-        'Position',[10 30*k 100 25],...
-        'Callback', @(~,~) updateLine(i));
-end
-
-% Atualização
-function updateLine(i)
-    set(hLine, ...
-        'YData', t(i)*ones(size(s)), ...
-        'ZData', U(i,:));
-end
+plot_surface(s, t, U, type, op);
+setup_time_selector(s, t, U);
 
 t_exec = toc;
-result = U;
 end
