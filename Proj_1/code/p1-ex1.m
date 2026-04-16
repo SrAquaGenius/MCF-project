@@ -14,7 +14,7 @@ r = 0.06;    % Risk free interest rate
 sigma = 0.3; % Market volatility
 
 %% Crank-Nicolson Method
-t_exec = crank_nicolson(type, op, Ss, T, K, r, sigma, 100, 200)
+tempo_execucao_cn = crank_nicolson(type, op, Ss, T, K, r, sigma, 100, 200)
 
 %% Runge-Kutta Method
-t_exec = runge_kutta_4(type, op, Ss, T, K, r, sigma, 100, 200)
+tempo_execucao_rk = runge_kutta_4(type, op, Ss, T, K, r, sigma, 100, 200)

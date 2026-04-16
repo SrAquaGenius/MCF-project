@@ -16,8 +16,8 @@ t = t_0:ht:T;    % points of time
 % Initialize matrix that stores the final results
 U = zeros(Nt+1, Ns+1);
 U(end,:) = payoff(type, op, s, K);              % Condition t = t_0
-U(:,1)   = bc(type, op, "left",  s_0, t, K, r); % Condition s = s_0
-U(:,end) = bc(type, op, "right", s_S, t, K, r); % Condition s = S*
+U(:,1)   = bc(type, op, "left",  s_0, t, K, r, T); % Condition s = s_0
+U(:,end) = bc(type, op, "right", s_S, t, K, r, T); % Condition s = S*
 
 % Construção da matriz espacial (igual ao CN mas sem ht)
 i = 2:Ns;
