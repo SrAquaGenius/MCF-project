@@ -1,4 +1,4 @@
-function [xCrit, yCrit] = findCriticalPoints(x, v, g)
+function [xCrit, vCrit] = findCriticalPoints(S, v, g)
 % FINDCRITICALPOINTS encontra pontos onde v' ≈ g'
 %
 % Entrada:
@@ -9,29 +9,30 @@ function [xCrit, yCrit] = findCriticalPoints(x, v, g)
 % Saída:
 %   idx  - índices dos pontos críticos na malha
 %   xCrit - posições dos pontos críticos
-
-    dx = x(2) - x(1);
-    dv = gradient(v, dx);
-    dg = gradient(g, dx);
-    h = dv(:) - dg(:);
-    
-    % Detect indexes where the zero crossing occurs
-    tol = 1e-6;
-    idx = find(h(1:end-1).*h(2:end) <= 0 & ...
-          (abs(h(1:end-1)) > tol | abs(h(2:end)) > tol));
-    n_idx = length(idx);
-    
-    % Aproximate critical point
-    xCrit = zeros(n_idx,1);
-    yCrit = zeros(n_idx,1);
-
-    for k = 1:n_idx
-        i = idx(k);
-        x1 = x(i);   x2 = x(i+1);
-        h1 = h(i);   h2 = h(i+1);
-        x0 = x1 - h1*(x2 - x1)/(h2 - h1);
-        xCrit(k) = x0;
-        v1 = v(i); v2 = v(i+1);
-        yCrit(k) = v1 + (v2 - v1)*(x0 - x1)/(x2 - x1);
-    end
+S = S(:);
+V = v(:);
+g = g(:);
+ 
+h   = V - g;            % positive in continuation, zero in stopping
+tol = 1e-10;
+ 
+% Detect sign changes (zero crossings of h)
+cross = find(h(1:end-1) .* h(2:end) <= 0 & ...
+             (abs(h(1:end-1)) > tol | abs(h(2:end)) > tol));
+ 
+nc    = numel(cross);
+xCrit = zeros(nc, 1);
+vCrit = zeros(nc, 1);
+ 
+for k = 1:nc
+    i  = cross(k);
+    s1 = S(i);   s2 = S(i+1);
+    h1 = h(i);   h2 = h(i+1);
+ 
+    % Linear interpolation for the zero of h
+    s0 = s1 - h1 * (s2 - s1) / (h2 - h1);
+ 
+    xCrit(k) = s0;
+    vCrit(k) = V(i) + (V(i+1) - V(i)) * (s0 - s1) / (s2 - s1);
+end
 end
