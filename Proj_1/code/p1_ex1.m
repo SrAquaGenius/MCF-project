@@ -7,13 +7,13 @@ addpath('Proj_1/code')
 type = "Eu"; % "Eu" or "Am"
 op = "Call";  % "Call" or "Put"
 
-Ss = 15;     % S* stock price boundary
-T = 1;       % Maturity time
-K = 10;      % Strike price
-r = 0.06;    % Risk free interest rate
-sigma = 0.3; % Market volatility
-Ns=10000;      % Numbers of intervals in space
-Nt=10000;      % Numbers of intervals in time
+Ss = 300;     % S* stock price boundary
+T = 3;       % Maturity time
+K = 90;      % Strike price
+r = -0.01535;    % Risk free interest rate
+sigma = 0.0916; % Market volatility
+Ns=3000;      % Numbers of intervals in space
+Nt=1000;      % Numbers of intervals in time
 
 %% Crank-Nicolson Method
 [tempo_execucao_cn, U] = crank_nicolson(type, op, Ss, T, K, r, sigma, Ns, Nt);

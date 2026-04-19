@@ -12,7 +12,7 @@ T = 1;       % Maturity time
 K = 10;      % Strike price
 r = 0.06;    % Risk free interest rate
 sigma = 0.3; % Market volatility
-Ns=1500;      % Numbers of intervals in space
+Ns=1000;      % Numbers of intervals in space
 Nt=100;      % Numbers of intervals in time
 %% Crank-Nicholson & PSOR
 %define only in the continuation region. 
