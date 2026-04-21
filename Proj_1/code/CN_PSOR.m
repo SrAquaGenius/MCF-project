@@ -119,8 +119,8 @@ end
 colormap(gca, parula);
 clim([0 T]);
  
-% Smooth boundary line for display
-S_sm = smooth(S_valid, max(1, round(nv/50)));
+windowSize = max(1, round(nv/50));
+S_sm = movmean(S_valid, windowSize);
 plot(S_sm, t_valid, 'k-', 'LineWidth', 2);
  
 xlabel('S', 'FontSize', 13);
