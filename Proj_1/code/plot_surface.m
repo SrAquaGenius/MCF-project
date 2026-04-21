@@ -22,7 +22,7 @@ title(['Black-Scholes ' Op ' Price Surface on an ' Type ' Option'])
 colorbar
 hold on
 
-% Grelha visual
+% Visual grid
 t_vals = linspace(t(1), t(end), 10);
 s_vals = linspace(s(1), s(end), 6);
 
