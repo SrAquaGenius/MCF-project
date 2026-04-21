@@ -2,7 +2,7 @@
 clc, clearvars
 %addpath('Proj_1/code')
 
-% Change the below values as the exercise request!
+% Change the below values as the exercise 1 and 2 request!
 
 type = "AM"; % or "Eu"
 op = "Put";  % or "Call"
@@ -15,8 +15,5 @@ sigma = 0.3; % Market volatility
 Ns=1000;      % Numbers of intervals in space
 Nt=10000;      % Numbers of intervals in time
 %% Crank-Nicholson & PSOR
-%define only in the continuation region. 
-%find the critical points.
-%in the stopping region, we have it defined as the payoff function.
 [tempo_execucao_cn_psor] = CN_PSOR(type, op, Ss, T, K, r, sigma, Nt, Ns);
 tempo_execucao_cn_psor

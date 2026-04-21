@@ -1,14 +1,14 @@
 function [xCrit, vCrit] = findCriticalPoints(S, v, g)
-% FINDCRITICALPOINTS encontra pontos onde v' ≈ g'
+% FINDCRITICALPOINTS: Find the points where v' ≈ g'
 %
-% Entrada:
-%   x - vetor de pontos da malha
-%   v - solução (u + g)
-%   g - função obstáculo avaliada nos pontos x
+% Input:
+%   x - Points vector of the grid
+%   v - Solution (u + g)
+%   g - Obstacle function assessed in the points x
 %
-% Saída:
-%   idx  - índices dos pontos críticos na malha
-%   xCrit - posições dos pontos críticos
+% Output:
+%   idx  - Index of the critical points of the grid
+%   xCrit - Position of the critical points
 S = S(:);
 V = v(:);
 g = g(:);
@@ -16,7 +16,7 @@ g = g(:);
 h   = V - g;            % positive in continuation, zero in stopping
 tol = 1e-10;
  
-% Detect sign changes (zero crossings of h)
+% Detect signal changes (zero crossings of h)
 cross = find(h(1:end-1) .* h(2:end) <= 0 & ...
              (abs(h(1:end-1)) > tol | abs(h(2:end)) > tol));
  

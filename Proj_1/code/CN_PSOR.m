@@ -6,19 +6,18 @@ t_0 = 0;
 dt  = (T  - t_0) / Nt;
 ds  = (Ss - s_0) / Ns;
 
-%  Grids: ALWAYS column vectors 
+%  Grids: Column vectors 
 t = (t_0 : dt : T)';            % (Nt+1) x 1
 S = (s_0 : ds : Ss)';           % (Ns+1) x 1
 
 m   = Ns - 1;                   % number of interior nodes
-idx = (1:m)';                   % column vector of interior indices
-
-%  CN coefficients (column vectors, length m) 
+idx = (1:m)';                
+%  CN coefficients 
 alpha = 0.25*dt*(sigma^2*idx.^2 - r*idx);
-beta  =  0.5*dt*(sigma^2*idx.^2 + r);      % note: positive; enters as (1+beta)
+beta  =  0.5*dt*(sigma^2*idx.^2 + r);      % enters as (1+beta)
 gamma = 0.25*dt*(sigma^2*idx.^2 + r*idx);
 
-%  System matrices (m x m)
+%  Dimension(m x m)
 A = diag(1 + beta)          ...
   - diag(gamma(1:m-1), +1)  ...
   - diag(alpha(2:m),   -1);
@@ -27,31 +26,31 @@ B = diag(1 - beta)          ...
   + diag(gamma(1:m-1), +1)  ...
   + diag(alpha(2:m),   -1);
 
-% ── PSOR parameters 
+% ── PSOR parameters defined
 omega    = 2 / (1 + sin(pi / (m+1)));
 tol      = 1e-6;
 max_iter = 5000;
 
-% ── Initial condition V(S, T) = payoff, column vector (Ns+1) x 1 
+% ── Initial condition V(S, T) = payoff
 V = max(K - S, 0);
 
 Sstar       = NaN(Nt, 1);
-V_old_inner = V(2:Ns);          % (m x 1) warm-start for PSOR
+V_old_inner = V(2:Ns);          
 V_surf          = zeros(Ns+1, Nt+1); % store full surface
 V_surf(:, Nt+1) = V;                 % payoff at t=T
 
 % Backward time-stepping 
 for n = Nt:-1:1
 
-    % RHS: (m x m) * (m x 1) = (m x 1)
+    % RHS
     b = B * V(2:Ns);
 
     % Lower BC: American put at S=0 is always worth K (exercise immediately,
-    % no need to discount — the holder receives K now, not at maturity).
-    % Both CN levels use K (it is constant in time for an American option).
+    % The holder receives K now, not at maturity.
+    % Both CN levels use K (it is constant in time for an American option as well).
     b(1) = b(1) + alpha(1) * (K + K);   % = 2*alpha(1)*K
 
-    % Obstacle: (m x 1) column, computed inline — no function call risk
+    % Obstacle
     g = max(K - S(2:Ns), 0);
 
     % Solve the LCP
@@ -62,7 +61,7 @@ for n = Nt:-1:1
     V_old_inner = V_new_inner;
     V_surf(:, n)    = V;   
 
-    % Early-exercise boundary
+    % Early exercise boundary
     [xCrit, ~] = findCriticalPoints(S, V, max(K - S, 0));
     if ~isempty(xCrit)
         Sstar(n) = xCrit(1);
@@ -108,8 +107,7 @@ S_valid = Sstar(valid);
 figure('Name','Continuation Region','NumberTitle','off');
 hold on;
  
-% Fill continuation region with horizontal strips coloured by time t
-% Each strip spans from S*(t) to Ss at height t — colour = t value
+
 nv = numel(t_valid);
 for k = 1:nv-1
     t1 = t_valid(k);   t2 = t_valid(k+1);

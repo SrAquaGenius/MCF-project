@@ -1,5 +1,5 @@
 function [res] = payoff(type, op, S, K)
-% Payoff: returns the payoff for a given option
+% Payoff: it returns the payoff for a given option
 % - type: Type of Option: "Am" American or "Eu" European
 % - op: Operation type: "Put" or "Call"
 % - S: Stock price

@@ -2,7 +2,7 @@
 clc, clearvars
 addpath('Proj_1/code')
 
-% Change the below values as the exercise request!
+% Change the below values as the exercise 1 or 2 request!
 
 type = "Eu"; % "Eu" or "Am"
 op = "Call";  % "Call" or "Put"
@@ -18,11 +18,8 @@ Nt=1000;      % Numbers of intervals in time
 %% Crank-Nicolson Method
 [tempo_execucao_cn, A] = crank_nicolson(type, op, Ss, T, K, r, sigma, Ns, Nt);
 tempo_execucao_cn
-%disp(U);
+
 
 %% Runge-Kutta Method
 [tempo_execucao_rk, B] = runge_kutta_4(type, op, Ss, T, K, r, sigma, Ns, Nt);
 tempo_execucao_rk
-%disp(U);
-
-C=A-B;

@@ -1,19 +1,19 @@
 function [x, iters] = PSOR_proj(A, b, g, omega, tol, max_iter, x_init)
-% PSOR_PROJ  Projected SOR for the LCP: x>=g, Ax>=b, (x-g)'(Ax-b)=0
+% PSOR_PROJ  PSOR for the LCP defined by the 3 constraints
 
-% Force all inputs to (n x 1) column vectors
+% Create column vectors
 b = b(:);
 g = g(:);
 n = numel(b);
 
 % Initial guess
 if nargin < 7 || isempty(x_init)
-    x = max(g, b ./ diag(A));   % element-wise divide — NOT b/diag(A)
+    x = max(g, b ./ diag(A));   
 else
     x = max(g, x_init(:));
 end
 
-% Extract diagonals once — avoids slicing full matrix rows in the inner loop
+% Extract diagonals once 
 %   dl(i) = A(i+1, i)  sub-diagonal   (length n-1)
 %   d(i)  = A(i,   i)  main diagonal  (length n)
 %   du(i) = A(i, i+1)  super-diagonal (length n-1)
@@ -34,11 +34,11 @@ for k = 1:max_iter
 
         x_gs = (b(i) - lo - hi) / d(i);
 
-        % SOR update then project onto x >= g
+        % The projection onto x >= g
         x(i) = max(g(i), x_old(i) + omega*(x_gs - x_old(i)));
     end
 
-    % Complementarity residual: should be zero at solution
+    % Complementarity residual: it should be zero at solution
     r_vec    = A*x - b;
     comp_res = min(x - g, r_vec);
     if norm(comp_res, inf) < tol
