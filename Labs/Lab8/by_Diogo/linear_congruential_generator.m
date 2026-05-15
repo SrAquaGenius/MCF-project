@@ -1,7 +1,8 @@
 function [res, t] = linear_congruential_generator(n, seed)
 %LINEAR_CONGRUENTIAL_GENERATOR Generate Pseudo-Random numbers from U([0,1])
 
-tic;
+if (nargout == 2); tic; end
+
 M = 2^31 - 1;
 a = 16807;
 b = 0;
@@ -15,5 +16,6 @@ for i = 1:n
 end
 
 res = m/M;
-t = toc;
+
+if (nargout == 2); t = toc; end
 end
