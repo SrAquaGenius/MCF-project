@@ -110,7 +110,7 @@ hValues = 0.005*(1/2).^(0:3);
 nSim = 1e6;
 
 
-convResults = swm_convergence(S0, mu, sigma, T, hValues, nSim, 2026, 10000);
+convResults = swm_convergence(S0, mu, sigma, T, hValues, nSim, 1, 10000);
 disp(convResults)
 
 figure
@@ -124,3 +124,76 @@ ylabel('error')
 legend('Strong EM', 'Strong Milstein', 'Weak EM', 'Weak Milstein', ...
     'Location', 'northwest')
 title('Strong and weak convergence')
+
+
+fprintf('\nStrong errors:\n')
+fprintf('h        ')
+fprintf('%12.6g', convResults.h)
+fprintf('\n')
+
+fprintf('EM       ')
+fprintf('%12.4e', convResults.StrongEM)
+fprintf('\n')
+
+fprintf('Milstein ')
+fprintf('%12.4e', convResults.StrongMilstein)
+fprintf('\n')
+
+fprintf('\nWeak errors:\n')
+fprintf('h        ')
+fprintf('%12.6g', convResults.h)
+fprintf('\n')
+
+fprintf('EM       ')
+fprintf('%12.4e', convResults.WeakEM)
+fprintf('\n')
+
+fprintf('Milstein ')
+fprintf('%12.4e', convResults.WeakMilstein)
+fprintf('\n')
+
+orderStrongEM = log(convResults.StrongEM(1:end-1)./convResults.StrongEM(2:end)) ./ ...
+                log(convResults.h(1:end-1)./convResults.h(2:end));
+
+orderStrongMil = log(convResults.StrongMilstein(1:end-1)./convResults.StrongMilstein(2:end)) ./ ...
+                 log(convResults.h(1:end-1)./convResults.h(2:end));
+
+orderWeakEM = log(convResults.WeakEM(1:end-1)./convResults.WeakEM(2:end)) ./ ...
+              log(convResults.h(1:end-1)./convResults.h(2:end));
+
+orderWeakMil = log(convResults.WeakMilstein(1:end-1)./convResults.WeakMilstein(2:end)) ./ ...
+               log(convResults.h(1:end-1)./convResults.h(2:end));
+
+fprintf('\nEstimated orders between consecutive h values:\n')
+fprintf('h_i/h_{i+1}      ')
+for i = 1:numel(orderStrongEM)
+    fprintf('%12.6g/%g', convResults.h(i), convResults.h(i+1))
+end
+fprintf('\n')
+
+fprintf('Strong EM        ')
+fprintf('%12.4f', orderStrongEM)
+fprintf('\n')
+
+fprintf('Strong Milstein  ')
+fprintf('%12.4f', orderStrongMil)
+fprintf('\n')
+
+fprintf('Weak EM          ')
+fprintf('%12.4f', orderWeakEM)
+fprintf('\n')
+
+fprintf('Weak Milstein    ')
+fprintf('%12.4f', orderWeakMil)
+fprintf('\n')
+
+ErrorTable = table(convResults.h, convResults.StrongEM, convResults.StrongMilstein, convResults.WeakEM, convResults.WeakMilstein, ...
+    'VariableNames', {'h', 'Strong_EM', 'Strong_Milstein', 'Weak_EM', 'Weak_Milstein'});
+
+OrderTable = table(convResults.h(1:end-1), convResults.h(2:end), ...
+    orderStrongEM, orderStrongMil, orderWeakEM, orderWeakMil, ...
+    'VariableNames', {'h_i', 'h_next', 'Strong_EM', 'Strong_Milstein', ...
+    'Weak_EM', 'Weak_Milstein'});
+
+disp(ErrorTable)
+disp(OrderTable)
