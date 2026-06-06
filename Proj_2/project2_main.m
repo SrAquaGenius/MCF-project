@@ -75,8 +75,8 @@ drift = @(t, x) mu*x;
 diffusion = @(t, x) sigma*x;
 diffusionDx = @(t, x) sigma;
 
-[~, SEM] = euler_maruyama(drift, diffusion, S0, T, N, dW);
-[~, SMil] = milstein(drift, diffusion, diffusionDx, S0, T, N, dW);
+[SEM] = euler_maruyama(drift, diffusion, S0, T, N, dW);
+[SMil] = milstein(drift, diffusion, diffusionDx, S0, T, N, dW);
 Sexact = S0*exp((mu - 0.5*sigma^2)*t + sigma*B);
 
 figure

@@ -1,4 +1,4 @@
-function [t, X] = milstein(a, b, dbdx, x0, T, N, dW)
+function [X] = milstein(a, b, dbdx, x0, T, N, dW)
 %MILSTEIN Milstein method for scalar SDE dX = a(t,X)dt + b(t,X)dB + 0.5*b(t,X)*dbdX*((dB)^2 - h), where dbdX is the derivative of b(t,X) with respect to X.
 
 h = T/N;

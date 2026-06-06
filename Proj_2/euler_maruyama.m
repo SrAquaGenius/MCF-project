@@ -1,4 +1,4 @@
-function [t, X] = euler_maruyama(a, b, x0, T, N, dW)
+function [X] = euler_maruyama(a, b, x0, T, N, dW)
 % Euler-Maruyama method for dX = a(t,X)dt + b(t,X)dB.
 
 h = T/N;
