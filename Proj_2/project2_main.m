@@ -1,17 +1,20 @@
-clear
-clc
-close all
+clear, clc, close all
 
 %% 1. Random numbers  
-seed = 1;
-% assuming always the 10^6 samples
-[u, seed] = uniform_lcg(seed, 10000);
-[z, ~, accRate] = normal_accept_rejection(seed, 10000);
+seed = 1;          % we choose this value
+n_samples = 10000; % assumed 10^6 samples
 
+[u, seed] = uniform_lcg(seed, n_samples);
+[z, accRate] = normal_accept_rejection(seed, n_samples);
+
+% Figure for the plot of the uniform distribution
 figure
 histogram(u, 40, 'Normalization', 'pdf')
+hold on
+yline(1, 'LineWidth', 1.5, 'Color','r')
 title('U([0,1]) with LCG')
 
+% Figure for the plot of the normal distribution
 figure
 histogram(z, 60, 'Normalization', 'pdf')
 hold on
@@ -19,23 +22,45 @@ xx = linspace(-4, 4, 400);
 plot(xx, exp(-0.5*xx.^2)/sqrt(2*pi), 'LineWidth', 1.5)
 title(sprintf('N(0,1) by acceptance-rejection, rate %.3f', accRate))
 
+% Figure for the plot of the halton points
 figure
-pointsHaltonDemo = halton_nodes(1000, [2 3]);
+n_points = 1000;
+pointsHaltonDemo = halton_nodes(n_points, [2 3]);
 plot(pointsHaltonDemo(:, 1), pointsHaltonDemo(:, 2), '.')
 axis square
 title('Halton nodes in [0,1]^2')
 
 %% 2. Area curve alpha -> |A_alpha|
-Narea = 1e6;
+n_samples = 1e6;
 alpha = linspace(-1, 1, 1000).';
-seed = 1;
-[u2, ~] = uniform_lcg(seed, 2*Narea);
-pointsMC = reshape(u2, Narea, 2);
-pointsQMC = halton_nodes(Narea, [2 3]);
+seed = 1;                                   % We choose this value
 
-areaMC = estimate_area_curve(pointsMC, alpha);
-areaQMC = estimate_area_curve(pointsQMC, alpha);
+f =@ (x,y) sin(10*(x.^2 - sin(3*y)));       % Evaluating Curve
 
+u = uniform_lcg(seed, 2*n_samples);         % Uniform distribution
+pointsMC = reshape(u, n_samples, 2);        % Points of Monte Carlo
+pointsQMC = halton_nodes(n_samples, [2 3]); % Points of Quasi Monte Carlo
+
+fMC = f(pointsMC(:,1),  pointsMC(:,2));     % Monte Carlo after f
+fQMC = f(pointsQMC(:,1),  pointsQMC(:,2));  % Quasi Monte Carlo after f
+
+areaMC  = mean(fMC  < alpha', 1);           % Area for Monte Carlo
+% areaMC = estimate_area(pointsMC, f, alpha);         % Old version
+areaQMC = mean(fQMC < alpha', 1);           % Area for Quasi Monte Carlo
+% areaQMC = estimate_area(pointsQMC, f, alpha);       % Old version
+
+% Figure for the plot of the function, on 3D
+[x, y] = meshgrid(linspace(0,1,200), linspace(0,1,200));
+z = f(x,y);
+figure
+surf(x, y, z)
+shading interp
+xlabel('x')
+ylabel('y')
+zlabel('f(x,y)')
+title('Surface plot of f(x,y)')
+
+% Figure for the plot of the estimated areas
 figure
 plot(alpha, areaMC, 'b.', 'MarkerSize', 6)
 hold on
@@ -46,6 +71,7 @@ ylabel('|A_\alpha|')
 title('Estimated area curve')
 grid on
 
+% Figure for the plot of the difference between estimated areas
 figure
 plot(alpha, areaQMC - areaMC, 'k', 'LineWidth', 1)
 xlabel('\alpha')
@@ -53,12 +79,11 @@ ylabel('|A_\alpha|_{QMC} - |A_\alpha|_{MC}')
 title('Difference between QMC and MC area estimates')
 grid on
 
-
-
-%possible graphic that evaluates the absolute error between the real values
-%of the function and the values obtained for each method
 %% 3 and 4(a). Euler-Maruyama and Milstein for SDE
-S0 = 1; %The convergence orders should not change. The paths and errors would scale with S0, but the theoretical order of convergence remains the same.
+%The convergence orders should not change. The paths and errors would scale
+% with S0, but the theoretical order of convergence remains the same.
+
+S0 = 1;
 T = 1;
 mu = 0.6;
 sigma = 0.25;
