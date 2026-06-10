@@ -83,29 +83,40 @@ grid on
 %The convergence orders should not change. The paths and errors would scale
 % with S0, but the theoretical order of convergence remains the same.
 
-S0 = 1;
 T = 1;
 mu = 0.6;
 sigma = 0.25;
 h = 0.001;
 N = round(T/h);
+
 seed = 1;
+S_0 = 1;
 
-[Z, seed] = normal_accept_rejection(seed, N);
-dW = sqrt(h)*Z;
 t = linspace(0, T, N + 1).';
-B = [0; cumsum(dW)]; %cumulative sums of the increments of the brownian motion to build a brownian motion (create the full brownian path).
 
+% Get a single realization of the brownian motion
+[Z] = normal_accept_rejection(seed, N);
+if length(Z) ~= N
+    error('Mismatch between Brownian increments and N.')
+end
+dW = sqrt(h)*Z;
+% Cumulative sums of the increments to create the full brownian path.
+B = [0; cumsum(dW)];
+
+% Get the drift and the diffusion and applying it to the methods
 drift = @(t, x) mu*x;
 diffusion = @(t, x) sigma*x;
 diffusionDx = @(t, x) sigma;
 
-[SEM] = euler_maruyama(drift, diffusion, S0, T, N, dW);
-[SMil] = milstein(drift, diffusion, diffusionDx, S0, T, N, dW);
-Sexact = S0*exp((mu - 0.5*sigma^2)*t + sigma*B);
+[SEM] = euler_maruyama(drift, diffusion, S_0, T, N, dW);
+[SMil] = milstein(drift, diffusion, diffusionDx, S_0, T, N, dW);
 
+% Exact solution (geometric brownian motion)
+S_exact = S_0*exp((mu - 0.5*sigma^2)*t + sigma*B);
+
+% Figure of the plot of the Brownian paths trajectories
 figure
-plot(t, Sexact, 'k', 'LineWidth', 1.5)
+plot(t, S_exact, 'k', 'LineWidth', 1.5)
 hold on
 plot(t, SEM, '--', 'LineWidth', 1.2)
 plot(t, SMil, ':', 'LineWidth', 1.5)
@@ -115,10 +126,10 @@ ylabel('S(t)')
 title('Exact and numerical paths')
 grid on
 
-%here, we are only using one realization of the brownian motion.
-
-errorEM = abs(Sexact - SEM);
-errorMil = abs(Sexact - SMil);
+% Figure of the plot of the errors of the Brownian paths trajectories
+% Here, we are only using one realization of the brownian motion.
+errorEM = abs(S_exact - SEM);
+errorMil = abs(S_exact - SMil);
 
 figure
 plot(t, errorEM, 'b', 'LineWidth', 1.2)
@@ -131,18 +142,26 @@ title('Absolute errors along one Brownian path')
 grid on
 
 %% 4(b). Convergence study
-hValues = 0.005*(1/2).^(0:3);
-nSim = 1e6;
 
+T = 1;
+mu = 0.6;
+sigma = 0.25;
 
-convResults = swm_convergence(S0, mu, sigma, T, hValues, nSim, 1, 10000);
-disp(convResults)
+S_0 = 1;
+
+i_vals = (0:3);
+%i_vals = 0;
+h_vals = 0.005*(1/2).^i_vals;
+n_sim = 1e6; % Number of simulations
+
+results = swm_convergence(S_0, mu, sigma, T, h_vals, n_sim, 1, 10000);
+disp(results)
 
 figure
-loglog(convResults.h, convResults.StrongEM, 'o-', ...
-    convResults.h, convResults.StrongMilstein, 's-', ...
-    convResults.h, convResults.WeakEM, 'o--', ...
-    convResults.h, convResults.WeakMilstein, 's--')
+loglog(results.h, results.StrongEM, 'o-', ...
+    results.h, results.StrongMilstein, 's-', ...
+    results.h, results.WeakEM, 'o--', ...
+    results.h, results.WeakMilstein, 's--')
 grid on
 xlabel('h')
 ylabel('error')
@@ -153,46 +172,46 @@ title('Strong and weak convergence')
 
 fprintf('\nStrong errors:\n')
 fprintf('h        ')
-fprintf('%12.6g', convResults.h)
+fprintf('%12.6g', results.h)
 fprintf('\n')
 
 fprintf('EM       ')
-fprintf('%12.4e', convResults.StrongEM)
+fprintf('%12.4e', results.StrongEM)
 fprintf('\n')
 
 fprintf('Milstein ')
-fprintf('%12.4e', convResults.StrongMilstein)
+fprintf('%12.4e', results.StrongMilstein)
 fprintf('\n')
 
 fprintf('\nWeak errors:\n')
 fprintf('h        ')
-fprintf('%12.6g', convResults.h)
+fprintf('%12.6g', results.h)
 fprintf('\n')
 
 fprintf('EM       ')
-fprintf('%12.4e', convResults.WeakEM)
+fprintf('%12.4e', results.WeakEM)
 fprintf('\n')
 
 fprintf('Milstein ')
-fprintf('%12.4e', convResults.WeakMilstein)
+fprintf('%12.4e', results.WeakMilstein)
 fprintf('\n')
 
-orderStrongEM = log(convResults.StrongEM(1:end-1)./convResults.StrongEM(2:end)) ./ ...
-                log(convResults.h(1:end-1)./convResults.h(2:end));
+orderStrongEM = log(results.StrongEM(1:end-1)./results.StrongEM(2:end)) ./ ...
+                log(results.h(1:end-1)./results.h(2:end));
 
-orderStrongMil = log(convResults.StrongMilstein(1:end-1)./convResults.StrongMilstein(2:end)) ./ ...
-                 log(convResults.h(1:end-1)./convResults.h(2:end));
+orderStrongMil = log(results.StrongMilstein(1:end-1)./results.StrongMilstein(2:end)) ./ ...
+                 log(results.h(1:end-1)./results.h(2:end));
 
-orderWeakEM = log(convResults.WeakEM(1:end-1)./convResults.WeakEM(2:end)) ./ ...
-              log(convResults.h(1:end-1)./convResults.h(2:end));
+orderWeakEM = log(results.WeakEM(1:end-1)./results.WeakEM(2:end)) ./ ...
+              log(results.h(1:end-1)./results.h(2:end));
 
-orderWeakMil = log(convResults.WeakMilstein(1:end-1)./convResults.WeakMilstein(2:end)) ./ ...
-               log(convResults.h(1:end-1)./convResults.h(2:end));
+orderWeakMil = log(results.WeakMilstein(1:end-1)./results.WeakMilstein(2:end)) ./ ...
+               log(results.h(1:end-1)./results.h(2:end));
 
 fprintf('\nEstimated orders between consecutive h values:\n')
 fprintf('h_i/h_{i+1}      ')
 for i = 1:numel(orderStrongEM)
-    fprintf('%12.6g/%g', convResults.h(i), convResults.h(i+1))
+    fprintf('%12.6g/%g', results.h(i), results.h(i+1))
 end
 fprintf('\n')
 
@@ -212,10 +231,10 @@ fprintf('Weak Milstein    ')
 fprintf('%12.4f', orderWeakMil)
 fprintf('\n')
 
-ErrorTable = table(convResults.h, convResults.StrongEM, convResults.StrongMilstein, convResults.WeakEM, convResults.WeakMilstein, ...
+ErrorTable = table(results.h, results.StrongEM, results.StrongMilstein, results.WeakEM, results.WeakMilstein, ...
     'VariableNames', {'h', 'Strong_EM', 'Strong_Milstein', 'Weak_EM', 'Weak_Milstein'});
 
-OrderTable = table(convResults.h(1:end-1), convResults.h(2:end), ...
+OrderTable = table(results.h(1:end-1), results.h(2:end), ...
     orderStrongEM, orderStrongMil, orderWeakEM, orderWeakMil, ...
     'VariableNames', {'h_i', 'h_next', 'Strong_EM', 'Strong_Milstein', ...
     'Weak_EM', 'Weak_Milstein'});
