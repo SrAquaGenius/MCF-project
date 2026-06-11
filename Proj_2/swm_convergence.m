@@ -1,12 +1,10 @@
-function results = swm_convergence(S0, mu, sigma, T, h_values, nSim, seed, chunkSize)
+function [results, orders] = swm_convergence(S0, mu, sigma, T, h_values, nSim, seed, chunkSize)
 % we simulate in smaller groups (chunks), since we have 1e6 simulations for differents values of h.
 %   Uses vectorized chunks to avoid storing all paths.
 
 if nargin < 8
     chunkSize = 10000;
 end
-
-
 
 nH = numel(h_values);
 strongEM = zeros(nH, 1);
@@ -31,8 +29,8 @@ for ih = 1:nH
         [Z, seed] = normal_accept_rejection(seed, m*N);
         Z = reshape(Z, m, N);
 
-        SEM = S0*ones(m, 1);
-        SMil = S0*ones(m, 1);
+        S_EM = S0*ones(m, 1);
+        S_Mil = S0*ones(m, 1);
         B = zeros(m, 1);
 
         for n = 1:N
@@ -40,18 +38,18 @@ for ih = 1:nH
 
             B = B + dW;
 
-            SEM = SEM + mu*SEM*h + sigma*SEM.*dW;
+            S_EM = S_EM + mu*S_EM*h + sigma*S_EM.*dW;
 
-            SMil = SMil + mu*SMil*h + sigma*SMil.*dW ...
-                + 0.5*sigma^2*SMil.*(dW.^2 - h);
+            S_Mil = S_Mil + mu*S_Mil*h + sigma*S_Mil.*dW ...
+                + 0.5*sigma^2*S_Mil.*(dW.^2 - h);
         end
 
-        Sexact = S0*exp((mu - 0.5*sigma^2)*T + sigma*B);
+        S_exact = S0*exp((mu - 0.5*sigma^2)*T + sigma*B);
 
-        sumAbsEM = sumAbsEM + sum(abs(SEM - Sexact));
-        sumAbsMil = sumAbsMil + sum(abs(SMil - Sexact));
-        sumDiffEM = sumDiffEM + sum(SEM - Sexact);
-        sumDiffMil = sumDiffMil + sum(SMil - Sexact);
+        sumAbsEM = sumAbsEM + sum(abs(S_EM - S_exact));
+        sumAbsMil = sumAbsMil + sum(abs(S_Mil - S_exact));
+        sumDiffEM = sumDiffEM + sum(S_EM - S_exact);
+        sumDiffMil = sumDiffMil + sum(S_Mil - S_exact);
 
         done = done + m;
     end
@@ -62,16 +60,41 @@ for ih = 1:nH
     weakMil(ih) = abs(sumDiffMil/nSim);
 end
 
-orderStrongEM = polyfit(log(h_values(:)), log(strongEM), 1);
-orderStrongMil = polyfit(log(h_values(:)), log(strongMil), 1);
-orderWeakEM = polyfit(log(h_values(:)), log(weakEM), 1);
-orderWeakMil = polyfit(log(h_values(:)), log(weakMil), 1);
-
 results = table(h_values(:), strongEM, strongMil, weakEM, weakMil, ...
-    'VariableNames', {'h', 'StrongEM', 'StrongMilstein', 'WeakEM', 'WeakMilstein'});
+    'VariableNames', {'h', 'StrongEM', 'StrongMil', 'WeakEM', 'WeakMil'});
 
-fprintf('Estimated strong order EM: %.3f\n', orderStrongEM(1));
-fprintf('Estimated strong order Milstein: %.3f\n', orderStrongMil(1));
-fprintf('Estimated weak order EM: %.3f\n', orderWeakEM(1));
-fprintf('Estimated weak order Milstein: %.3f\n', orderWeakMil(1));
+h_values = h_values(:);
+
+pStrongEM_aux    = polyfit(log(h_values(:)), log(strongEM), 1);
+pStrongEM        = pStrongEM_aux(1);
+pStrongEM_local  = mean(log(strongEM(1:end-1)./strongEM(2:end)) ./ ...
+                  log(h_values(1:end-1)./h_values(2:end)));
+pStrongMil_aux   = polyfit(log(h_values(:)), log(strongMil), 1);
+pStrongMil       = pStrongMil_aux(1);
+pStrongMil_local = mean(log(strongMil(1:end-1)./strongMil(2:end)) ./ ...
+                  log(h_values(1:end-1)./h_values(2:end)));
+pWeakEM_aux      = polyfit(log(h_values(:)), log(weakEM), 1);
+pWeakEM          = pWeakEM_aux(1);
+pWeakEM_local    = mean(log(weakEM(1:end-1)./weakEM(2:end)) ./ ...
+                  log(h_values(1:end-1)./h_values(2:end)));
+pWeakMil_aux     = polyfit(log(h_values(:)), log(weakMil), 1);
+pWeakMil         = pWeakMil_aux(1);
+pWeakMil_local   = mean(log(weakMil(1:end-1)./weakMil(2:end)) ./ ...
+                  log(h_values(1:end-1)./h_values(2:end)));
+
+%fprintf('Estimated global strong order EM: %.3f\n', pStrongEM);
+%fprintf('Estimated local strong order EM: %.3f\n', pStrongEM_local);
+%fprintf('Estimated global strong order Milstein: %.3f\n', pStrongMil);
+%fprintf('Estimated local strong order Milstein: %.3f\n', pStrongMil_local);
+%fprintf('Estimated global weak order EM: %.3f\n', pWeakEM);
+%fprintf('Estimated local weak order EM: %.3f\n', pWeakEM_local);
+%fprintf('Estimated global weak order Milstein: %.3f\n', pWeakMil);
+%fprintf('Estimated local weak order Milstein: %.3f\n', pWeakMil_local);
+
+orders = table(...
+    pStrongEM, pStrongEM_local, pStrongMil, pStrongMil_local, ...
+    pWeakEM, pWeakEM_local, pWeakMil, pWeakMil_local, ...
+    'VariableNames', {...
+    'pStrongEM', 'pStrongEM_local', 'pStrongMil', 'pStrongMil_local', ...
+    'pWeakEM', 'pWeakEM_local', 'pWeakMil', 'pWeakMil_local'});
 end

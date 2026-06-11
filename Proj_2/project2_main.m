@@ -45,9 +45,7 @@ fMC = f(pointsMC(:,1),  pointsMC(:,2));     % Monte Carlo after f
 fQMC = f(pointsQMC(:,1),  pointsQMC(:,2));  % Quasi Monte Carlo after f
 
 areaMC  = mean(fMC  < alpha', 1);           % Area for Monte Carlo
-% areaMC = estimate_area(pointsMC, f, alpha);         % Old version
 areaQMC = mean(fQMC < alpha', 1);           % Area for Quasi Monte Carlo
-% areaQMC = estimate_area(pointsQMC, f, alpha);       % Old version
 
 % Figure for the plot of the function, on 3D
 [x, y] = meshgrid(linspace(0,1,200), linspace(0,1,200));
@@ -79,7 +77,7 @@ ylabel('|A_\alpha|_{QMC} - |A_\alpha|_{MC}')
 title('Difference between QMC and MC area estimates')
 grid on
 
-%% 3 and 4(a). Euler-Maruyama and Milstein for SDE
+%% 3 and 4(a). Euler-Maruyama and Mil for SDE
 %The convergence orders should not change. The paths and errors would scale
 % with S0, but the theoretical order of convergence remains the same.
 
@@ -120,7 +118,7 @@ plot(t, S_exact, 'k', 'LineWidth', 1.5)
 hold on
 plot(t, SEM, '--', 'LineWidth', 1.2)
 plot(t, SMil, ':', 'LineWidth', 1.5)
-legend('Exact', 'Euler-Maruyama', 'Milstein', 'Location', 'northwest')
+legend('Exact', 'Euler-Maruyama', 'Mil', 'Location', 'northwest')
 xlabel('t')
 ylabel('S(t)')
 title('Exact and numerical paths')
@@ -135,11 +133,12 @@ figure
 plot(t, errorEM, 'b', 'LineWidth', 1.2)
 hold on
 plot(t, errorMil, 'r', 'LineWidth', 1.2)
-legend('Euler-Maruyama error', 'Milstein error', 'Location', 'northwest')
+legend('Euler-Maruyama error', 'Mil error', 'Location', 'northwest')
 xlabel('t')
 ylabel('Absolute error')
 title('Absolute errors along one Brownian path')
 grid on
+Mil
 
 %% 4(b). Convergence study
 
@@ -150,18 +149,18 @@ sigma = 0.25;
 S_0 = 1;
 
 i_vals = (0:3);
-%i_vals = 0;
 h_vals = 0.005*(1/2).^i_vals;
 n_sim = 1e6; % Number of simulations
 
-results = swm_convergence(S_0, mu, sigma, T, h_vals, n_sim, 1, 10000);
+[results, orders] = swm_convergence(S_0, mu, sigma, T, h_vals, n_sim, 1, 10000);
 disp(results)
+disp(orders)
 
 figure
 loglog(results.h, results.StrongEM, 'o-', ...
-    results.h, results.StrongMilstein, 's-', ...
+    results.h, results.StrongMil, 's-', ...
     results.h, results.WeakEM, 'o--', ...
-    results.h, results.WeakMilstein, 's--')
+    results.h, results.WeakMil, 's--')
 grid on
 xlabel('h')
 ylabel('error')
@@ -169,75 +168,9 @@ legend('Strong EM', 'Strong Milstein', 'Weak EM', 'Weak Milstein', ...
     'Location', 'northwest')
 title('Strong and weak convergence')
 
-
-fprintf('\nStrong errors:\n')
-fprintf('h        ')
-fprintf('%12.6g', results.h)
-fprintf('\n')
-
-fprintf('EM       ')
-fprintf('%12.4e', results.StrongEM)
-fprintf('\n')
-
-fprintf('Milstein ')
-fprintf('%12.4e', results.StrongMilstein)
-fprintf('\n')
-
-fprintf('\nWeak errors:\n')
-fprintf('h        ')
-fprintf('%12.6g', results.h)
-fprintf('\n')
-
-fprintf('EM       ')
-fprintf('%12.4e', results.WeakEM)
-fprintf('\n')
-
-fprintf('Milstein ')
-fprintf('%12.4e', results.WeakMilstein)
-fprintf('\n')
-
-orderStrongEM = log(results.StrongEM(1:end-1)./results.StrongEM(2:end)) ./ ...
-                log(results.h(1:end-1)./results.h(2:end));
-
-orderStrongMil = log(results.StrongMilstein(1:end-1)./results.StrongMilstein(2:end)) ./ ...
-                 log(results.h(1:end-1)./results.h(2:end));
-
-orderWeakEM = log(results.WeakEM(1:end-1)./results.WeakEM(2:end)) ./ ...
-              log(results.h(1:end-1)./results.h(2:end));
-
-orderWeakMil = log(results.WeakMilstein(1:end-1)./results.WeakMilstein(2:end)) ./ ...
-               log(results.h(1:end-1)./results.h(2:end));
-
-fprintf('\nEstimated orders between consecutive h values:\n')
-fprintf('h_i/h_{i+1}      ')
-for i = 1:numel(orderStrongEM)
-    fprintf('%12.6g/%g', results.h(i), results.h(i+1))
-end
-fprintf('\n')
-
-fprintf('Strong EM        ')
-fprintf('%12.4f', orderStrongEM)
-fprintf('\n')
-
-fprintf('Strong Milstein  ')
-fprintf('%12.4f', orderStrongMil)
-fprintf('\n')
-
-fprintf('Weak EM          ')
-fprintf('%12.4f', orderWeakEM)
-fprintf('\n')
-
-fprintf('Weak Milstein    ')
-fprintf('%12.4f', orderWeakMil)
-fprintf('\n')
-
-ErrorTable = table(results.h, results.StrongEM, results.StrongMilstein, results.WeakEM, results.WeakMilstein, ...
-    'VariableNames', {'h', 'Strong_EM', 'Strong_Milstein', 'Weak_EM', 'Weak_Milstein'});
-
-OrderTable = table(results.h(1:end-1), results.h(2:end), ...
-    orderStrongEM, orderStrongMil, orderWeakEM, orderWeakMil, ...
-    'VariableNames', {'h_i', 'h_next', 'Strong_EM', 'Strong_Milstein', ...
-    'Weak_EM', 'Weak_Milstein'});
+ErrorTable = table(results.h, ...
+    results.StrongEM, results.StrongMil, results.WeakEM, results.WeakMil, ...
+    'VariableNames', {'h', ...
+    'Strong_EM', 'Strong_Mil', 'Weak_EM', 'Weak_Mil'});
 
 disp(ErrorTable)
-disp(OrderTable)
