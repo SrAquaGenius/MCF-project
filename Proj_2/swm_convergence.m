@@ -26,7 +26,7 @@ for ih = 1:nH
     while done < nSim
         m = min(chunkSize, nSim - done);
 
-        [Z, seed] = normal_accept_rejection(seed, m*N);
+        [Z, ~ ,seed] = normal_accept_rejection(seed, m*N);
         Z = reshape(Z, m, N);
 
         S_EM = S0*ones(m, 1);
