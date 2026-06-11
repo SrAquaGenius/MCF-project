@@ -1,4 +1,4 @@
-function [z, acceptance_rate, last_seed] = normal_accept_rejection(seed, n)
+function [z, last_seed] = normal_accept_rejection(seed, n, showAccRate)
 %NORMAL_ACCEPT_REJECTION Standard normal samples using acceptance-rejection.
 %   Uses an exponential proposal for the half-normal distribution, the
 %   right/positive of a normal distribution.
@@ -38,7 +38,10 @@ while k <= n
     end
 end
 
-acceptance_rate = n/tries;
-if (nargout == 3); last_seed = seed; end
+if (nargin == 3 && showAccRate)
+    acceptance_rate = n/tries;
+    fprintf('Acceptance rate of %12.4f', acceptance_rate);
+end
+if (nargout == 2); last_seed = seed; end
 
 end

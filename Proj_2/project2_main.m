@@ -5,7 +5,7 @@ seed = 1;          % we choose this value
 n_samples = 10000; % assumed 10^6 samples
 
 [u, seed] = uniform_lcg(seed, n_samples);
-[z, accRate] = normal_accept_rejection(seed, n_samples);
+z = normal_accept_rejection(seed, n_samples, 1);
 
 % Figure for the plot of the uniform distribution
 figure
@@ -20,7 +20,7 @@ histogram(z, 60, 'Normalization', 'pdf')
 hold on
 xx = linspace(-4, 4, 400);
 plot(xx, exp(-0.5*xx.^2)/sqrt(2*pi), 'LineWidth', 1.5)
-title(sprintf('N(0,1) by acceptance-rejection, rate %.3f', accRate))
+title('N(0,1) by acceptance-rejection')
 
 % Figure for the plot of the halton points
 figure
