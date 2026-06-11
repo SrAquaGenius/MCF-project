@@ -82,15 +82,6 @@ pWeakMil         = pWeakMil_aux(1);
 pWeakMil_local   = mean(log(weakMil(1:end-1)./weakMil(2:end)) ./ ...
                   log(h_values(1:end-1)./h_values(2:end)));
 
-%fprintf('Estimated global strong order EM: %.3f\n', pStrongEM);
-%fprintf('Estimated local strong order EM: %.3f\n', pStrongEM_local);
-%fprintf('Estimated global strong order Milstein: %.3f\n', pStrongMil);
-%fprintf('Estimated local strong order Milstein: %.3f\n', pStrongMil_local);
-%fprintf('Estimated global weak order EM: %.3f\n', pWeakEM);
-%fprintf('Estimated local weak order EM: %.3f\n', pWeakEM_local);
-%fprintf('Estimated global weak order Milstein: %.3f\n', pWeakMil);
-%fprintf('Estimated local weak order Milstein: %.3f\n', pWeakMil_local);
-
 orders = table(...
     pStrongEM, pStrongEM_local, pStrongMil, pStrongMil_local, ...
     pWeakEM, pWeakEM_local, pWeakMil, pWeakMil_local, ...

@@ -93,7 +93,7 @@ S_0 = 1;
 t = linspace(0, T, N + 1).';
 
 % Get a single realization of the brownian motion
-[Z] = normal_accept_rejection(seed, N);
+Z = normal_accept_rejection(seed, N);
 if length(Z) ~= N
     error('Mismatch between Brownian increments and N.')
 end
@@ -133,12 +133,11 @@ figure
 plot(t, errorEM, 'b', 'LineWidth', 1.2)
 hold on
 plot(t, errorMil, 'r', 'LineWidth', 1.2)
-legend('Euler-Maruyama error', 'Mil error', 'Location', 'northwest')
+legend('Euler-Maruyama error', 'Milstein error', 'Location', 'northwest')
 xlabel('t')
 ylabel('Absolute error')
 title('Absolute errors along one Brownian path')
 grid on
-Mil
 
 %% 4(b). Convergence study
 
@@ -167,10 +166,3 @@ ylabel('error')
 legend('Strong EM', 'Strong Milstein', 'Weak EM', 'Weak Milstein', ...
     'Location', 'northwest')
 title('Strong and weak convergence')
-
-ErrorTable = table(results.h, ...
-    results.StrongEM, results.StrongMil, results.WeakEM, results.WeakMil, ...
-    'VariableNames', {'h', ...
-    'Strong_EM', 'Strong_Mil', 'Weak_EM', 'Weak_Mil'});
-
-disp(ErrorTable)
